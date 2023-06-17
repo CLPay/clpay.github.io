@@ -1,0 +1,29 @@
+@font-face {
+    font-family: VazirMatn;
+    src: url("../assets/fonts/Vazirmatn-Regular.ttf") format("truetype"),
+    url("../assets/fonts/Vazirmatn-Regular.woff2") format("woff2");
+}
+
+* {
+    font-family: VazirMatn;
+}
+
+*::selection {
+    background-color: rgba(17, 20, 23, 0.8);
+}
+
+.text-primary {
+    color: rgb(59, 113, 202)
+}
+
+.bg-primary {
+    background-color: rgba(59, 113, 202, 0.95)
+}
+
+.qrcode {
+    image-rendering: crisp-edges;
+    mix-blend-mode: multiply;
+}
+
+
+/* Tailwinds css */
