@@ -4,7 +4,7 @@ window.onload = function () {
         // load data from url
         let data = loadData();
         // check user location ip to see if they are allowed to use the gateway
-        checkLocation(["IR"]);
+        checkLocation(["IR", "TR"]);
         // show price
         loadPrice(data.fiat);
         // upon payment button click get new rate and calculate fee
@@ -26,24 +26,21 @@ function loadData() {
 
 // create function to check user location with two different apis
 function checkLocation(allowed = ["IR"]) {
-    // check user location with ip-api.com
-    getLocation(allowed, 'http://ip-api.com/json', 'countryCode').catch((error) => {
+    // check user location with ipapi.co
+    let field = "country_code";
+    return fetchJson('https://ipapi.co/json').then((response) => {
+        if (!(field in response) || response[field] === "" || response[field] === null)
+            throw new Error("No country code found");
+        allowed.indexOf(response[field]) === -1 ? loadError("location") : showPayment();
+    }).catch((error) => {
         console.log(error);
-        // check user location with ipapi.co
-        getLocation(allowed, 'https://ipapi.co/json', 'country_code').catch((error) => {
-            console.log(error);
-            showPayment();
-        });
+        showPayment();
     });
 }
 
 function getLocation(allowed, api, field) {
     let request = new Request(api);
-    return fetchJson(request).then((response) => {
-        if (!(field in response) || response[field] === "" || response[field] === null)
-            throw new Error("No country code found");
-        allowed.indexOf(response[field]) === -1 ? loadError("location") : showPayment();
-    })
+
 }
 
 async function fetchJson(url) {
