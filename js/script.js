@@ -4,7 +4,7 @@ window.onload = function () {
         // load data from url
         let data = loadData();
         // check user location ip to see if they are allowed to use the gateway
-        checkLocation(["IR", "TR"]);
+        checkLocation();
         // show price
         loadPrice(data.fiat);
         // upon payment button click get new rate and calculate fee
@@ -24,23 +24,23 @@ function loadData() {
         throw new Error("No data found in url");
 }
 
-// create function to check user location with two different apis
+// check user location
 function checkLocation(allowed = ["IR"]) {
-    // check user location with ipapi.co
-    let field = "country_code";
-    return fetchJson('https://ipapi.co/json').then((response) => {
-        if (!(field in response) || response[field] === "" || response[field] === null)
-            throw new Error("No country code found");
-        allowed.indexOf(response[field]) === -1 ? loadError("location") : showPayment();
-    }).catch((error) => {
+    // check user location with 3rd party api
+    try {
+        let field = "countryCode";
+        fetchJson('https://freeipapi.com/api/json').then((response) => {
+            if (!(field in response) || response[field] === "" || response[field] === null)
+                throw new Error("No country code found");
+            allowed.indexOf(response[field]) === -1 ? loadError("location") : showPayment();
+        }).catch((error) => {
+            console.log(error);
+            showPayment();
+        });
+    } catch (error) {
         console.log(error);
         showPayment();
-    });
-}
-
-function getLocation(allowed, api, field) {
-    let request = new Request(api);
-
+    }
 }
 
 async function fetchJson(url) {
