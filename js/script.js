@@ -70,7 +70,7 @@ function calcFee(amount) {
     let fee = 0;
     let total = amount;
     for (let i = 0; i <= 3; i++) {
-        fee = total > 200000 ? total * 0.05 : 10000;
+        fee = total > 250000 ? total * 0.06 : 15000;
         total = amount - fee;
     }
     return (fee.toFixed(0) / 10).toFixed(0) * 10;
