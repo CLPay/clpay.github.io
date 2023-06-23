@@ -25,5 +25,11 @@
     mix-blend-mode: multiply;
 }
 
+.disabled {
+    background-color: gray;
+    box-shadow: none;
+    cursor: wait;
+}
+
 
 /* Tailwinds css */

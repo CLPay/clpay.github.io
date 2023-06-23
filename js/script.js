@@ -48,10 +48,16 @@ async function fetchJson(url) {
 }
 
 function getPaymentUrl(e, fiat, code, address, open = true) {
+    // disable button
+    e.target.classList.add('disabled');
+    e.target.setAttribute('role', 'disabled')
     const gateway = "https://weswap.digital/quick";
     let link = "";
     const request = new Request('https://api.weswap.digital/api/rate');
     fetchJson(request).then((response) => {
+        // check if response is status 200
+        if (response.status !== 200 && response.success !== true)
+            throw new Error("failed fetching rate");
         let rate = response.result.TRX;
         let fee = calcFee(fiat, rate);
         let amount = (fiat - fee) / rate;
@@ -62,6 +68,8 @@ function getPaymentUrl(e, fiat, code, address, open = true) {
         console.log(link);
         return link;
     }).catch((error) => {
+        e.target.classList.remove('disabled');
+        e.target.setAttribute('role', 'button')
         console.log(error);
     });
 }
