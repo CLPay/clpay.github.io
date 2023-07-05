@@ -51,7 +51,7 @@ function getPaymentUrl(e, fiat, code, address, open = true) {
     // disable button
     e.target.classList.add('disabled');
     e.target.setAttribute('role', 'disabled')
-    const gateway = "https://weswap.digital/quick";
+    const gateway = "https://digiswap.org/quick";
     let link = "";
     const request = new Request('https://api.weswap.digital/api/rate');
     fetchJson(request).then((response) => {
@@ -78,7 +78,7 @@ function calcFee(amount) {
     let fee = 0;
     let total = amount;
     for (let i = 0; i <= 3; i++) {
-        fee = total > 250000 ? total * 0.06 : 15000;
+        fee = 15000;
         total = amount - fee;
     }
     return (fee.toFixed(0) / 10).toFixed(0) * 10;
