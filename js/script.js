@@ -47,38 +47,76 @@ async function fetchJson(url) {
     return fetch(url).then(res => res.clone().json());
 }
 
-function getPaymentUrl(e, fiat, code, address, open = true) {
-    // disable button
-    e.target.classList.add('disabled');
-    e.target.setAttribute('role', 'disabled')
-    const gateway = "https://digiswap.org/quick";
-    let link = "";
-    const request = new Request('https://api.weswap.digital/api/rate');
-    fetchJson(request).then((response) => {
-        // check if response is status 200
-        if (response.status !== 200 && response.success !== true)
-            throw new Error("failed fetching rate");
-        let rate = response.result.TRX;
-        let fee = calcFee(fiat, rate);
+function getGatewayData(gateway) {
+    switch (gateway) {
+        case 1:
+            return {
+                id: gateway,
+                url: "https://weswap.digital/quick",
+                rate: "https://api.weswap.digital/api/rate",
+                fee: (amount) => amount > 250000 ? amount * 0.06 : 15000
+            };
+        case 2:
+            return {
+                id: gateway,
+                url: "https://digiswap.org/quick",
+                rate: "https://api.digiswap.org/api/v1/asset/getPrices",
+                fee: (amount) => 15000 + Math.min( amount * 0.01, 2000) + 250
+            }
+        default:
+            throw new Error("Invalid gateway");
+    }
+
+}
+
+function getPaymentUrl(e, gateway, fiat, code, address, open = true) {
+    getRate(e.target, gateway).then((rate) => {
+        let fee = calcFee(fiat, gateway);
         let amount = (fiat - fee) / rate;
         amount = amount.toFixed(3) + code;
-        link = gateway + "?amount=" + amount + "&currency=" + 'TRX' + "&address=" + address;
+        let link = gateway.url + "?amount=" + amount + "&currency=" + 'TRX' + "&address=" + address;
         if (open)
             window.open(link, '_self');
         console.log(link);
         return link;
     }).catch((error) => {
-        e.target.classList.remove('disabled');
-        e.target.setAttribute('role', 'button')
         console.log(error);
     });
 }
 
-function calcFee(amount) {
+async function getRate(button, gateway) {
+    // disable button
+    button.classList.add('disabled');
+    button.setAttribute('role', 'disabled')
+    // fetch rate from gateway api
+    const request = new Request(gateway.rate);
+    return fetchJson(request).then((response) => {
+        switch (gateway.id) {
+            case 1: // weswap
+                // check if response is status 200
+                if (response.status !== 200 && response.success !== true)
+                    throw new Error("failed fetching rate");
+                return response.result.TRX;
+            case 2: // digiswap
+                // check response keys
+                if (!("usd_sell_price" in response) || !("assets" in response))
+                    throw new Error("failed fetching rate");
+                return response.usd_sell_price * response.assets[1].usd_price;
+        }
+    }).catch((error) => {
+        throw error;
+    }).finally(() => {
+        // enable button
+        button.classList.remove('disabled');
+        button.setAttribute('role', 'button')
+    });
+}
+
+function calcFee(amount, gateway) {
     let fee = 0;
     let total = amount;
     for (let i = 0; i <= 3; i++) {
-        fee = 15000;
+        fee = gateway.fee(total);
         total = amount - fee;
     }
     return (fee.toFixed(0) / 10).toFixed(0) * 10;
@@ -123,6 +161,7 @@ function loadPrice(fiat) {
 
 function openPayment(data) {
     document.getElementById("link").addEventListener("click", (e) => {
-        getPaymentUrl(e, data.fiat, data.code, data.address, true);
+        let gateway = getGatewayData(data.gateway);
+        getPaymentUrl(e, gateway, data.fiat, data.code, data.address, true);
     });
 }
