@@ -25,7 +25,7 @@ function loadData() {
 }
 
 // check user location
-function checkLocation(allowed = ["IR"]) {
+function checkLocation(allowed = ["IR", "TR"]) {
     // check user location with 3rd party api
     try {
         let field = "countryCode";
@@ -61,7 +61,7 @@ function getGatewayData(gateway) {
                 id: gateway,
                 url: "https://digiswap.org/quick",
                 rate: "https://api.digiswap.org/api/v1/asset/getPrices",
-                fee: (amount) => 15000 + Math.min( amount * 0.01, 2000) + 250
+                fee: (amount) => 15000
             }
         default:
             throw new Error("Invalid gateway");
