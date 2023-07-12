@@ -63,6 +63,13 @@ function getGatewayData(gateway) {
                 rate: "https://api.digiswap.org/api/v1/asset/getPrices",
                 fee: (amount) => 15000
             }
+        case 3:
+            return {
+                id: gateway,
+                url: "https://changeto.digital/quick",
+                rate: "https://api.changeto.digital/api/rate",
+                fee: (amount) => amount > 250000 ? amount * 0.06 : 15000
+            };
         default:
             throw new Error("Invalid gateway");
     }
