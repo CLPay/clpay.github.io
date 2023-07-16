@@ -99,7 +99,7 @@ async function getRate(button, gateway) {
     const request = new Request(gateway.rate);
     return fetchJson(request).then((response) => {
         switch (gateway.id) {
-            case 1: // weswap
+            case 1: case 3: // weswap and changeto
                 // check if response is status 200
                 if (response.status !== 200 && response.success !== true)
                     throw new Error("failed fetching rate");
